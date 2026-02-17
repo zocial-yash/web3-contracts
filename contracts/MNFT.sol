@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -14,50 +14,27 @@ contract MNFT is ERC721URIStorage {
         owner = msg.sender;
     }
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        //static code to stop token transfer
-        require(false, "Transfer not allowed");
-        safeTransferFrom(from, to, tokenId, "");
-    }
-
-    function safeTransferFrom(
-        address from,
+    // To stop the static transfer of the MNFT
+    function _update(
         address to,
         uint256 tokenId,
-        bytes memory data
-    ) public virtual override {
-        //static code to stop token transfer
-        require(false, "Transfer not allowed");
-        require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721: caller is not token owner or approved"
-        );
-        _safeTransfer(from, to, tokenId, data);
-    }
+        address auth
+    ) internal virtual override returns (address) {
+        
+        address from = _ownerOf(tokenId);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        //static code to stop token transfer
-        require(false, "Transfer not allowed");
-        require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721: caller is not token owner or approved"
-        );
-        _transfer(from, to, tokenId);
+        if (from != address(0) && to != address(0)) {
+            require(false, "Transfer not allowed");
+        }
+
+        return super._update(to, tokenId, auth);
     }
 
     function mintMembership(string memory _tokenURI, uint256 _tokenId)
         public
         returns (uint256)
     {
-        require(_tokenIds.current() < 10000, "No more NFTs can be minted");
+        // require(_tokenIds.current() < 10000, "No more NFTs can be minted");
         _tokenIds.increment();
         _mint(msg.sender, _tokenId);
         _setTokenURI(_tokenId, _tokenURI);
@@ -81,5 +58,13 @@ contract MNFT is ERC721URIStorage {
         public
     {
         membershipStatus[_tokenId] = status;
+    }
+
+    function getTokenIds()
+        public
+        view
+        returns (uint256)
+    {
+        return _tokenIds.current();
     }
 }
